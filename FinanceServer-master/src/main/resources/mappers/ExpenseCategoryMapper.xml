@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ru.finance.my.repository.mapper.ExpenseCategoryMapper">
+
+  <resultMap id="ExpenseCategoryMap" type="ru.finance.my.entity.ExpenseCategory">
+    <result column="id" property="id"/>
+    <result column="name" property="name"/>
+    <result column="user_id" property="userId"/>
+    <result column="access_to_delete" property="accessToDelete"/>
+  </resultMap>
+
+  <select id="getAll" resultMap="ExpenseCategoryMap">
+    SELECT
+    ec.id,
+    ec.name,
+    ec.user_id,
+    ec.access_to_delete
+    FROM expense_category ec
+    WHERE ec.user_id=#{userId}
+  </select>
+
+  <select id="getById" resultMap="ExpenseCategoryMap">
+    SELECT
+    ec.id,
+    ec.name,
+    ec.user_id,
+    ec.access_to_delete
+    FROM expense_category ec
+    WHERE ec.id=#{expenseCategoryId}
+  </select>
+
+  <insert id="createNew" parameterType="ru.finance.my.entity.ExpenseCategory">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('expense_category_seq');
+    </selectKey>
+    INSERT INTO expense_category(id, name, user_id)
+    VALUES(#{id}, #{name}, #{userId})
+  </insert>
+
+  <delete id="deleteById">
+    DELETE FROM expense_category
+    WHERE id=#{expenseCategoryId}
+    AND access_to_delete=true
+  </delete>
+
+  <update id="update" parameterType="ru.finance.my.entity.ExpenseCategory">
+    UPDATE expense_category SET
+    name=#{name}
+    WHERE id=#{id}
+  </update>
+
+  <select id="getDefaultIdByUserId" resultType="Long">
+    SELECT
+    ec.id
+    FROM expense_category ec
+    WHERE ec.user_id = #{userId}
+    AND ec.access_to_delete = false
+  </select>
+
+  <insert id="createDefaultForNewUser" parameterType="ru.finance.my.entity.ExpenseCategory">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('expense_category_seq');
+    </selectKey>
+    INSERT INTO expense_category(id, name, user_id, access_to_delete)
+    VALUES(#{id}, #{name}, #{userId}, #{accessToDelete})
+  </insert>
+
+  <delete id="deleteByUserId">
+    DELETE FROM expense_category
+    WHERE user_id=#{userId}
+  </delete>
+</mapper>

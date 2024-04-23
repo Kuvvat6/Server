@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ru.finance.my.repository.mapper.IncomeMapper">
+
+  <resultMap id="IncomeMap" type="ru.finance.my.entity.Income">
+    <result column="id" property="id"/>
+    <result column="sum" property="sum"/>
+    <result column="date" property="date"/>
+    <association
+        property="incomeCategory"
+        resultMap="ru.finance.my.repository.mapper.IncomeCategoryMapper.IncomeCategoryMap"
+        columnPrefix="ic_"
+    />
+    <association
+        property="account"
+        resultMap="ru.finance.my.repository.mapper.AccountMapper.AccountMap"
+        columnPrefix="a_"
+    />
+  </resultMap>
+
+  <select id="getAll" resultMap="IncomeMap">
+    <![CDATA[
+    SELECT
+    i.id,
+    i.sum,
+    i.date,
+    i.income_category_id AS ic_id,
+    ic.name AS ic_name,
+    ic.user_id AS ic_user_id,
+    ic.access_to_delete AS ic_access_to_delete,
+    i.account_id AS a_id,
+    a.name AS a_name,
+    a.sum AS a_sum,
+    a.user_id AS a_user_id
+    FROM income i
+    LEFT JOIN income_category ic ON ic.id = i.income_category_id
+    LEFT JOIN account a on a.id = i.account_id
+    WHERE i.date <= #{beforeDate}
+    AND i.date >= #{afterDate}
+    AND ic.user_id=#{userId}
+    ORDER BY i.date DESC
+    ]]>
+  </select>
+
+  <select id="getById" resultMap="IncomeMap">
+    SELECT
+    i.id,
+    i.sum,
+    i.date,
+    i.income_category_id AS ic_id,
+    ic.name AS ic_name,
+    ic.user_id AS ic_user_id,
+    ic.access_to_delete AS ic_access_to_delete,
+    i.account_id AS a_id,
+    a.name AS a_name,
+    a.sum AS a_sum,
+    a.user_id AS a_user_id
+    FROM income i
+    LEFT JOIN income_category ic ON ic.id = i.income_category_id
+    LEFT JOIN account a on a.id = i.account_id
+    WHERE i.id = #{incomeId}
+  </select>
+
+  <insert id="createNew" parameterType="ru.finance.my.entity.Income">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('income_seq');
+    </selectKey>
+    INSERT INTO income(id, sum, account_id, income_category_id, date)
+    VALUES(#{id}, #{sum},  #{account.id}, #{incomeCategory.id}, #{date})
+  </insert>
+
+  <delete id="deleteById">
+    DELETE FROM income
+    WHERE id=#{incomeId}
+  </delete>
+
+  <update id="update" parameterType="ru.finance.my.entity.Income">
+    UPDATE income SET
+    sum=#{sum},
+    account_id=#{account.id},
+    income_category_id=#{incomeCategory.id},
+    date=#{date}
+    WHERE id=#{id}
+  </update>
+
+  <update id="updateAllIncomesByIncomeCategory">
+    UPDATE income SET
+    income_category_id=#{newIncomeCategoryId}
+    WHERE income_category_id=#{oldIncomeCategoryId}
+  </update>
+
+  <update id="deleteAccount">
+    UPDATE income SET
+    account_id=NULL
+    WHERE account_id=#{accountId}
+  </update>
+
+  <delete id="deleteByUserId">
+    DELETE FROM income
+    USING income_category
+    WHERE income_category.user_id=#{userId}
+    AND income.income_category_id = income_category.id
+  </delete>
+</mapper>

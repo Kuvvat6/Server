@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ru.finance.my.repository.mapper.ExpenseMapper">
+
+  <resultMap id="ExpenseMap" type="ru.finance.my.entity.Expense">
+    <result column="id" property="id"/>
+    <result column="sum" property="sum"/>
+    <result column="date" property="date"/>
+    <association
+        property="expenseCategory"
+        resultMap="ru.finance.my.repository.mapper.ExpenseCategoryMapper.ExpenseCategoryMap"
+        columnPrefix="ec_"
+    />
+    <association
+        property="account"
+        resultMap="ru.finance.my.repository.mapper.AccountMapper.AccountMap"
+        columnPrefix="a_"
+    />
+  </resultMap>
+
+  <select id="getAll" resultMap="ExpenseMap">
+    <![CDATA[
+    SELECT
+    e.id,
+    e.sum,
+    e.date,
+    e.expense_category_id AS ec_id,
+    ec.name AS ec_name,
+    ec.user_id AS ec_user_id,
+    ec.access_to_delete AS ec_access_to_delete,
+    e.account_id AS a_id,
+    a.name AS a_name,
+    a.sum AS a_sum,
+    a.user_id AS a_user_id
+    FROM expense e
+    LEFT JOIN expense_category ec ON ec.id = e.expense_category_id
+    LEFT JOIN account a ON a.id = e.account_id
+    WHERE e.date <= #{beforeDate}
+    AND e.date >= #{afterDate}
+    AND ec.user_id=#{userId}
+    ORDER BY e.date DESC
+    ]]>
+  </select>
+
+  <select id="getById" resultMap="ExpenseMap">
+    SELECT
+    e.id,
+    e.sum,
+    e.date,
+    e.expense_category_id AS ec_id,
+    ec.name AS ec_name,
+    ec.user_id AS ec_user_id,
+    ec.access_to_delete AS ec_access_to_delete,
+    e.account_id AS a_id,
+    a.name AS a_name,
+    a.sum AS a_sum,
+    a.user_id AS a_user_id
+    FROM expense e
+    LEFT JOIN expense_category ec ON ec.id = e.expense_category_id
+    LEFT JOIN account a ON a.id = e.account_id
+    WHERE e.id=#{expenseId}
+  </select>
+
+  <insert id="createNew" parameterType="ru.finance.my.entity.Expense">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('expense_seq');
+    </selectKey>
+    INSERT INTO expense(id, sum, account_id, expense_category_id, date)
+    VALUES(#{id}, #{sum},  #{account.id}, #{expenseCategory.id}, #{date})
+  </insert>
+
+  <delete id="deleteById">
+    DELETE FROM expense
+    WHERE id=#{expenseId}
+  </delete>
+
+  <update id="update" parameterType="ru.finance.my.entity.Expense">
+    UPDATE expense SET
+    sum=#{sum},
+    account_id=#{account.id},
+    expense_category_id=#{expenseCategory.id},
+    date=#{date}
+    WHERE id=#{id}
+  </update>
+
+  <update id="updateAllExpensesByExpenseCategory">
+    UPDATE expense SET
+    expense_category_id=#{newExpenseCategoryId}
+    WHERE expense_category_id=#{oldExpenseCategoryId}
+  </update>
+
+  <update id="deleteAccount">
+    UPDATE expense SET
+    account_id=NULL
+    WHERE account_id=#{accountId}
+  </update>
+
+  <delete id="deleteByUserId">
+    DELETE FROM expense
+    USING expense_category
+    WHERE expense_category.user_id = #{userId}
+    AND expense.expense_category_id = expense_category.id
+  </delete>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ru.finance.my.repository.mapper.UserMapper">
+
+  <resultMap id="UserMap" type="ru.finance.my.entity.User">
+    <result column="id" property="id"/>
+    <result column="login" property="login"/>
+    <result column="password" property="password"/>
+    <result column="name" property="name"/>
+    <result column="email" property="email"/>
+  </resultMap>
+
+  <select id="getByLogin" resultMap="UserMap">
+    SELECT
+    u.id,
+    u.login,
+    u.password,
+    u.name,
+    u.email
+    FROM public.user u
+    WHERE u.login=#{login}
+  </select>
+
+  <insert id="createNew" parameterType="ru.finance.my.entity.User">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('user_seq');
+    </selectKey>
+    INSERT INTO public.user(id, login, password, name, email)
+    VALUES(#{id}, #{login},  #{password}, #{name}, #{email})
+  </insert>
+
+  <select id="existByEmail" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM public.user u WHERE u.email=#{email})
+  </select>
+
+  <update id="updateUser" parameterType="ru.finance.my.entity.User">
+    UPDATE public.user SET
+    login = #{login},
+    email = #{email},
+    name = #{name},
+    password = #{password}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="deleteUserById">
+    DELETE FROM public.user
+    WHERE id = #{userId}
+  </delete>
+
+  <select id="emailIsNotUnique" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM public.user u WHERE u.email=#{email} AND u.id=#{userId})
+  </select>
+
+  <select id="existByLogin" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM public.user u WHERE u.login=#{login})
+  </select>
+
+  <select id="loginIsNotUnique" resultType="boolean">
+    SELECT EXISTS(SELECT 1 FROM public.user u WHERE u.login=#{login} AND u.id=#{userId})
+  </select>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ru.finance.my.repository.mapper.IncomeCategoryMapper">
+
+  <resultMap id="IncomeCategoryMap" type="ru.finance.my.entity.IncomeCategory">
+    <result column="id" property="id"/>
+    <result column="name" property="name"/>
+    <result column="user_id" property="userId"/>
+    <result column="access_to_delete" property="accessToDelete"/>
+  </resultMap>
+
+  <select id="getAll" resultMap="IncomeCategoryMap">
+    SELECT
+    ic.id,
+    ic.name,
+    ic.user_id,
+    ic.access_to_delete
+    FROM income_category ic
+    WHERE ic.user_id=#{userId}
+  </select>
+
+  <select id="getById" resultMap="IncomeCategoryMap">
+    SELECT
+    ic.id,
+    ic.name,
+    ic.user_id,
+    ic.access_to_delete
+    FROM income_category ic
+    WHERE ic.id=#{incomeCategoryId}
+  </select>
+
+  <insert id="createNew" parameterType="ru.finance.my.entity.IncomeCategory">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('income_category_seq');
+    </selectKey>
+    INSERT INTO income_category(id, name, user_id)
+    VALUES(#{id}, #{name}, #{userId})
+  </insert>
+
+  <delete id="deleteById">
+    DELETE FROM income_category
+    WHERE id=#{incomeCategoryId}
+    AND access_to_delete=true
+  </delete>
+
+  <update id="update" parameterType="ru.finance.my.entity.IncomeCategory">
+    UPDATE income_category SET
+    name=#{name}
+    WHERE id=#{id}
+  </update>
+
+  <select id="getDefaultIdByUserId" resultType="Long">
+    SELECT
+    ic.id
+    FROM income_category ic
+    WHERE ic.user_id = #{userId}
+    AND ic.access_to_delete = false
+  </select>
+
+  <insert id="createDefaultForNewUser" parameterType="ru.finance.my.entity.IncomeCategory">
+    <selectKey order="BEFORE" keyProperty="id" resultType="Long">
+      SELECT nextval('income_category_seq');
+    </selectKey>
+    INSERT INTO income_category(id, name, user_id, access_to_delete)
+    VALUES(#{id}, #{name}, #{userId}, #{accessToDelete})
+  </insert>
+
+  <delete id="deleteByUserId">
+    DELETE FROM income_category
+    WHERE user_id=#{userId}
+  </delete>
+</mapper>

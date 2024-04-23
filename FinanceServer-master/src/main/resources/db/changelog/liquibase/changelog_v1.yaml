@@ -1,0 +1,357 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-user-seq
+      author: Chashemov
+      changes:
+        -  createSequence:
+             cycle: false
+             dataType: bigint
+             incrementBy: 1
+             maxValue: 9223372036854775807
+             minValue: 1
+             schemaName:  public
+             sequenceName: user_seq
+             startValue:  1
+  - changeSet:
+      id: create-user-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('user_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: login
+                  type: VARCHAR(128)
+              - column:
+                  name: password
+                  type: VARCHAR(128)
+              - column:
+                  name: name
+                  type: VARCHAR(128)
+              - column:
+                  name: email
+                  type: VARCHAR(128)
+            tableName: user
+  - changeSet:
+      id: create-account-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: account_seq
+            startValue: 1
+  - changeSet:
+      id: create-account-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('account_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(128)
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: sum
+                  type: BIGINT
+            tableName: account
+  - changeSet:
+      id: fk-account-user
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: account
+            constraintName: fk_account_user
+            referencedColumnNames: id
+            referencedTableName: user
+  - changeSet:
+      id: create-expense-category-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: expense_category_seq
+            startValue: 1
+  - changeSet:
+      id: create-expense-category-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('expense_category_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(128)
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: access_to_delete
+                  type: BOOLEAN
+                  defaultValue: true
+            tableName: expense_category
+  - changeSet:
+      id: fk-expense-category-user
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: expense_category
+            constraintName: fk_expense_category_user
+            referencedColumnNames: id
+            referencedTableName: user
+  - changeSet:
+      id: create-income-category-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: income_category_seq
+            startValue: 1
+  - changeSet:
+      id: create-income-category-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('income_category_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(128)
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: access_to_delete
+                  type: BOOLEAN
+                  defaultValue: true
+            tableName: income_category
+  - changeSet:
+      id: fk-income-category-user
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: income_category
+            constraintName: fk_income_category_user
+            referencedColumnNames: id
+            referencedTableName: user
+  - changeSet:
+      id: create-expense-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: expense_seq
+            startValue: 1
+  - changeSet:
+      id: create-expense-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('expense_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: account_id
+                  type: BIGINT
+              - column:
+                  name: sum
+                  type: BIGINT
+              - column:
+                  name: date
+                  type: TIMESTAMP
+              - column:
+                  name: expense_category_id
+                  type: BIGINT
+            tableName: expense
+  - changeSet:
+      id: fk-expense-expense-category
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: expense_category_id
+            baseTableName: expense
+            constraintName: fk_expense_expense_category
+            referencedColumnNames: id
+            referencedTableName: expense_category
+  - changeSet:
+      id: fk-expense-account
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: account_id
+            baseTableName: expense
+            constraintName: fk_expense_account
+            referencedColumnNames: id
+            referencedTableName: account
+  - changeSet:
+      id: create-income-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: income_seq
+            startValue: 1
+  - changeSet:
+      id: create-income-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('income_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: account_id
+                  type: BIGINT
+              - column:
+                  name: sum
+                  type: BIGINT
+              - column:
+                  name: date
+                  type: TIMESTAMP
+              - column:
+                  name: income_category_id
+                  type: BIGINT
+            tableName: income
+  - changeSet:
+      id: fk-income-income-category
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: income_category_id
+            baseTableName: income
+            constraintName: fk_income_income_category
+            referencedColumnNames: id
+            referencedTableName: income_category
+  - changeSet:
+      id: fk-income-account
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: account_id
+            baseTableName: income
+            constraintName: fk_income_account
+            referencedColumnNames: id
+            referencedTableName: account
+  - changeSet:
+      id: create-transfer-seq
+      author: Chashemov
+      changes:
+        - createSequence:
+            cycle: false
+            dataType: bigint
+            incrementBy: 1
+            maxValue: 9223372036854775807
+            minValue: 1
+            schemaName: public
+            sequenceName: transfer_seq
+            startValue: 1
+  - changeSet:
+      id: create-transfer-table
+      author: Chashemov
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  defaultValueComputed: nextval('transfer_seq')
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: from_account_id
+                  type: BIGINT
+              - column:
+                  name: to_account_id
+                  type: BIGINT
+              - column:
+                  name: sum
+                  type: BIGINT
+              - column:
+                  name: date
+                  type: TIMESTAMP
+            tableName: transfer
+  - changeSet:
+      id: fk-transfer-from-account
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: from_account_id
+            baseTableName: transfer
+            constraintName: fk_transfer_from_account
+            referencedColumnNames: id
+            referencedTableName: account
+  - changeSet:
+      id: fk-transfer-to-account
+      author: Chashemov
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: to_account_id
+            baseTableName: transfer
+            constraintName: fk_transfer_to_account
+            referencedColumnNames: id
+            referencedTableName: account
